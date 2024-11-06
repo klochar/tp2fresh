@@ -280,7 +280,7 @@ int main() {
     // Création des pipes
     if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
         perror("Erreur de création de pipe");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     // Premier processus fils pour `rev < In.txt`
@@ -295,27 +295,27 @@ int main() {
         int input_fd = open("In.txt", O_RDONLY);
         if (input_fd == -1) {
             perror("Erreur d'ouverture de In.txt");
-            exit(EXIT_FAILURE);
+            exit(1);
         }
         dup2(input_fd, 0);
         close(input_fd);
 
         execlp("rev", "rev", NULL);
         perror("Erreur exec rev");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     // Attendre que le premier `rev` termine et lire le résultat dans pipe1
     close(pipe1[1]);  // Fermer l'écriture de pipe1 dans le processus parent
     nbytes = read(pipe1[0], buffer, BUFFER_SIZE);
     buffer[nbytes] = '\0';  // Marquer la fin de chaîne pour l'affichage
-    printf("Sortie après le premier rev:\n%s\n", buffer);
+    printf("Sortie après le premier rev:\n%s\n\n", buffer);
     close(pipe1[0]);
 
     // Création du deuxième processus fils pour `rev` (inverser à nouveau)
     if (pipe(pipe1) == -1) {  // Réutiliser pipe1 pour le second rev
         perror("Erreur de création de pipe");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     pid_t pid2 = fork();
@@ -331,7 +331,7 @@ int main() {
 
         execlp("rev", "rev", NULL);
         perror("Erreur exec rev");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     // Écrire la sortie du premier rev dans le pipe1 pour le deuxième processus
@@ -343,7 +343,7 @@ int main() {
     close(pipe2[1]);  // Fermer l'écriture de pipe2 dans le processus parent
     nbytes = read(pipe2[0], buffer, BUFFER_SIZE);
     buffer[nbytes] = '\0';
-    printf("Sortie après le deuxième rev (retour à l'original):\n%s\n", buffer);
+    printf("Sortie après le deuxième rev (retour à l'original):\n%s\n\n", buffer);
     close(pipe2[0]);
 
     // Troisième processus fils pour `diff - In.txt -s`
@@ -357,12 +357,12 @@ int main() {
         dup2(input_fd, 0);
         execlp("diff", "diff", "-", "In.txt", "-s", NULL);
         perror("Erreur exec diff");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     // Attendre la fin de tous les processus fils
     while (wait(NULL) > 0);
 
-    return EXIT_SUCCESS;
+    return 0;
 }
 

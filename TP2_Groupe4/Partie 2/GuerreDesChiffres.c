@@ -189,85 +189,231 @@
 
 
 
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <pthread.h>
+// #include <unistd.h>
+// #include <semaphore.h>
+// #include <signal.h>
+
+
+// int entre_buffer = 0, sortie_buffer = 0;
+// int somme_produits = 0, somme_consommes = 0;
+// int chiffres_produits = 0, chiffres_consommes = 0;
+// int nmbProd, nmbCons,taille_buffer;
+// int *buffer;
+// sem_t mutex, empty, full;
+// volatile sig_atomic_t flag_de_fin = 0;
+
+// void* producteur(void* pid) {
+//       int id = *(int *)pid;
+//     while (1) {
+//         int x = (rand() % 9) + 1; // Générer aléatoirement un chiffre non nul
+//         sem_wait(&empty); // Attendre qu'il y ait de la place dans le tampon
+//         sem_wait(&mutex); // Entrée en section critique
+//         buffer[entre_buffer] = x; // Déposer le chiffre dans le tampon
+//         entre_buffer = (entre_buffer + 1) % taille_buffer; // Mettre à jour l'indice du tampon circulaire
+//         somme_produits += x; // Mettre à jour la somme des chiffres produits
+//         chiffres_produits++;
+//         sem_post(&mutex); // Sortie de section critique
+//         sem_post(&full); // Indiquer qu'il y a un élément de plus dans le tampon
+//         if (flag_de_fin) break; // Vérifier si le traitement doit être interrompu
+//     }
+//     pthread_exit(NULL);
+// }
+
+// void* consommateur(void* cid) {
+//      int id = *(int *)cid;
+//     while (1) {
+//         sem_wait(&full); // Attendre qu'il y ait des éléments dans le tampon
+//         sem_wait(&mutex); // Entrée en section critique
+//         int x = buffer[sortie_buffer]; // Récupérer un chiffre du tampon
+//         sortie_buffer = (sortie_buffer + 1) % taille_buffer; // Mettre à jour l'indice du tampon circulaire
+//         if (x == 0) break; // Vérifier si le chiffre est 0
+//         somme_consommes += x; // Mettre à jour la somme des chiffres consommés
+//         chiffres_consommes++;
+//         sem_post(&mutex); // Sortie de section critique
+//         sem_post(&empty); // Indiquer qu'il y a un espace de plus dans le tampon
+//     }
+//     sem_post(&mutex); // Sortie de section critique (au cas où il y aurait un interblocage)
+//     pthread_exit(NULL);
+// }
+
+// alarme(){
+//      flag_de_fin = 1; 
+// }
+
+// int main(int argc, char* argv[]) {
+//     // Les paramètres du programme sont, dans l'ordre :
+//     // le nombre de producteurs, le nombre de consommateurs
+//     // et la taille du tampon.
+//     printf("MAIN: \n");
+//     nmbProd = atoi(argv[1]);
+//     nmbCons = atoi(argv[2]);
+//     taille_buffer = atoi(argv[3]);
+//     buffer = (int *)malloc(taille_buffer * sizeof(int));
+
+
+//     srand(time(NULL));
+
+//     // Initialisation des sémaphores
+//     sem_init(&mutex, 0, 1); // Mutex pour la section critique
+//     sem_init(&empty, 0, taille_buffer); // Nombre de places vides dans le tampon
+//     sem_init(&full, 0, 0); // Nombre d'éléments dans le tampon
+
+//     // Création des threads producteurs
+//     pthread_t producers[nmbProd];
+//     int producer_ids[nmbProd];
+//     for (int i = 0; i < nmbProd; i++) {
+//         producer_ids[i] = i;
+//         printf("phtreadCReate prod: \n");
+//         pthread_create(&producers[i], NULL, producteur, (void *)&producer_ids[i]);
+//     }
+
+//     // Création des threads consommateurs
+//     pthread_t consumers[nmbCons];
+//     int consumer_ids[nmbCons];
+//     for (int i = 0; i < nmbCons; i++) {
+//         consumer_ids[i] = i;
+//         printf("phtreadCReate cons: \n");
+//         pthread_create(&consumers[i], NULL, consommateur, (void *)&consumer_ids[i]);
+//     }
+
+//     signal(SIGALRM, alarme);
+//     alarm(1); // Armer l'alarme pour 1 seconde
+
+//     // Attendre la fin des threads producteurs
+//     for (int i = 0; i < nmbProd; i++) {
+//         pthread_join(producers[i], NULL);
+//     }
+
+//     // Déposer autant de chiffres 0 qu'il y a de threads consommateurs
+//     for (int i = 0; i < nmbCons; i++) {
+//         sem_wait(&empty);
+//         sem_wait(&mutex);
+//         buffer[entre_buffer] = 0;
+//         entre_buffer = (entre_buffer + 1) % taille_buffer;
+//         sem_post(&mutex);
+//         sem_post(&full);
+//     }
+
+//     // Attendre la fin des threads consommateurs
+//     for (int i = 0; i < nmbCons; i++) {
+//         pthread_join(consumers[i], NULL);
+//     }
+
+//     // Afficher les sommes et les nombres de chiffres produits et consommés
+//     printf("Somme des chiffres produits: %d\n", somme_produits);
+//     printf("Somme des chiffres consommés: %d\n", somme_consommes);
+//     printf("Nombre de chiffres produits: %d\n", chiffres_produits);
+//     printf("Nombre de chiffres consommés: %d\n", chiffres_consommes);
+
+//     // Destruction des sémaphores
+//     sem_destroy(&mutex);
+//     sem_destroy(&empty);
+//     sem_destroy(&full);
+
+//     return 0;
+// }
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <signal.h>
-
+#include <time.h>
 
 int entre_buffer = 0, sortie_buffer = 0;
 int somme_produits = 0, somme_consommes = 0;
 int chiffres_produits = 0, chiffres_consommes = 0;
-int nmbProd, nmbCons,taille_buffer;
+int nmbProd, nmbCons, taille_buffer;
 int *buffer;
 sem_t mutex, empty, full;
 volatile sig_atomic_t flag_de_fin = 0;
 
 void* producteur(void* pid) {
-      int id = *(int *)pid;
+    int id = *(int *)pid;
     while (1) {
-        int x = (rand() % 9) + 1; // Générer aléatoirement un chiffre non nul
+        int x = (rand() % 9) + 1; // Générer un chiffre aléatoire entre 1 et 9
         sem_wait(&empty); // Attendre qu'il y ait de la place dans le tampon
         sem_wait(&mutex); // Entrée en section critique
-        buffer[entre_buffer] = x; // Déposer le chiffre dans le tampon
-        entre_buffer = (entre_buffer + 1) % taille_buffer; // Mettre à jour l'indice du tampon circulaire
-        somme_produits += x; // Mettre à jour la somme des chiffres produits
+        
+        // Déposer le chiffre dans le tampon
+        buffer[entre_buffer] = x;
+        entre_buffer = (entre_buffer + 1) % taille_buffer;
+        
+        // Mettre à jour les sommes et compteurs
+        somme_produits += x;
         chiffres_produits++;
+        
         sem_post(&mutex); // Sortie de section critique
-        sem_post(&full); // Indiquer qu'il y a un élément de plus dans le tampon
-        if (flag_de_fin) break; // Vérifier si le traitement doit être interrompu
+        sem_post(&full); // Indiquer qu'il y a un nouvel élément dans le tampon
+        
+        if (flag_de_fin) break; // Arrêter si le drapeau de fin est activé
     }
     pthread_exit(NULL);
 }
 
 void* consommateur(void* cid) {
-     int id = *(int *)cid;
+    int id = *(int *)cid;
     while (1) {
         sem_wait(&full); // Attendre qu'il y ait des éléments dans le tampon
         sem_wait(&mutex); // Entrée en section critique
+
         int x = buffer[sortie_buffer]; // Récupérer un chiffre du tampon
-        sortie_buffer = (sortie_buffer + 1) % taille_buffer; // Mettre à jour l'indice du tampon circulaire
-        if (x == 0) break; // Vérifier si le chiffre est 0
-        somme_consommes += x; // Mettre à jour la somme des chiffres consommés
+        sortie_buffer = (sortie_buffer + 1) % taille_buffer;
+
+        if (x == 0) { // Fin de consommation
+            sem_post(&mutex);
+            break;
+        }
+        
+        // Mettre à jour les sommes et compteurs
+        somme_consommes += x;
         chiffres_consommes++;
+        
         sem_post(&mutex); // Sortie de section critique
-        sem_post(&empty); // Indiquer qu'il y a un espace de plus dans le tampon
+        sem_post(&empty); // Indiquer qu'il y a un espace libre dans le tampon
     }
-    sem_post(&mutex); // Sortie de section critique (au cas où il y aurait un interblocage)
     pthread_exit(NULL);
 }
 
-alarme(){
-     flag_de_fin = 1; 
+void alarme(int sig) {
+    flag_de_fin = 1;
 }
 
 int main(int argc, char* argv[]) {
-    // Les paramètres du programme sont, dans l'ordre :
-    // le nombre de producteurs, le nombre de consommateurs
-    // et la taille du tampon.
-    printf("MAIN: \n");
+    if (argc < 4) {
+        fprintf(stderr, "Usage: %s <nb producteurs> <nb consommateurs> <taille buffer>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     nmbProd = atoi(argv[1]);
     nmbCons = atoi(argv[2]);
     taille_buffer = atoi(argv[3]);
     buffer = (int *)malloc(taille_buffer * sizeof(int));
-
+    if (buffer == NULL) {
+        perror("Erreur d'allocation du tampon");
+        exit(EXIT_FAILURE);
+    }
 
     srand(time(NULL));
-
+    
     // Initialisation des sémaphores
-    sem_init(&mutex, 0, 1); // Mutex pour la section critique
+    sem_init(&mutex, 0, 1);        // Mutex pour la section critique
     sem_init(&empty, 0, taille_buffer); // Nombre de places vides dans le tampon
-    sem_init(&full, 0, 0); // Nombre d'éléments dans le tampon
+    sem_init(&full, 0, 0);         // Nombre d'éléments dans le tampon
 
     // Création des threads producteurs
     pthread_t producers[nmbProd];
     int producer_ids[nmbProd];
     for (int i = 0; i < nmbProd; i++) {
         producer_ids[i] = i;
-        printf("phtreadCReate prod: \n");
-        pthread_create(&producers[i], NULL, producteur, (void *)&producer_ids[i]);
+        if (pthread_create(&producers[i], NULL, producteur, &producer_ids[i]) != 0) {
+            perror("Erreur lors de la création d'un thread producteur");
+            exit(EXIT_FAILURE);
+        }
     }
 
     // Création des threads consommateurs
@@ -275,12 +421,14 @@ int main(int argc, char* argv[]) {
     int consumer_ids[nmbCons];
     for (int i = 0; i < nmbCons; i++) {
         consumer_ids[i] = i;
-        printf("phtreadCReate cons: \n");
-        pthread_create(&consumers[i], NULL, consommateur, (void *)&consumer_ids[i]);
+        if (pthread_create(&consumers[i], NULL, consommateur, &consumer_ids[i]) != 0) {
+            perror("Erreur lors de la création d'un thread consommateur");
+            exit(EXIT_FAILURE);
+        }
     }
 
     signal(SIGALRM, alarme);
-    alarm(1); // Armer l'alarme pour 1 seconde
+    alarm(1); // Définir une alarme pour 1 seconde
 
     // Attendre la fin des threads producteurs
     for (int i = 0; i < nmbProd; i++) {
@@ -308,7 +456,8 @@ int main(int argc, char* argv[]) {
     printf("Nombre de chiffres produits: %d\n", chiffres_produits);
     printf("Nombre de chiffres consommés: %d\n", chiffres_consommes);
 
-    // Destruction des sémaphores
+    // Libérer les ressources
+    free(buffer);
     sem_destroy(&mutex);
     sem_destroy(&empty);
     sem_destroy(&full);

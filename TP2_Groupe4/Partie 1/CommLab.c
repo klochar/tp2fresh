@@ -8,9 +8,9 @@ int main(int argc, char** argv) {
 
     // QUESTION 1 --------------------------------------
     // Compile question 1:
-    if (!fork()) {
-        execlp("gcc", "gcc", "-o", "ansq1", "TubesNommes.c", NULL);
-    }
+    // if (!fork()) {
+    //     execlp("gcc", "gcc", "-o", "ansq1", "TubesNommes.c", NULL);
+    // }
     wait(NULL);
     
     // run the solution
