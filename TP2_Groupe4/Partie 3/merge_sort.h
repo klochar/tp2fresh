@@ -10,6 +10,8 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h> 
+#include <pthread.h>
+
 
 #define MAX_ARRAY_SIZE 1000000
 #define MAX_NUM_SIZE 1000000
@@ -30,4 +32,4 @@ void merge_sort( int left, int right);
 void merge(int left, int mid, int right);
 void execute_merge_sort(int start, int end, int num_processes);
 void show_array();
-void write_array_into_file();
+void write_array_into_file(int left, int right, int *array, int size, const char *action);

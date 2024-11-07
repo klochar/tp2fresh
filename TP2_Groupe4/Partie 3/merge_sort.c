@@ -1,19 +1,131 @@
 #include "merge_sort.h"
+// si on augmente N+delta on aura pour effect d augmenter le nombre de processus et donc plus de charge pour le cpu (les cores) et donc plus de temps, demonstration avec resultats:
+// time ./mergeSortQ1 10 1
+// Array size: 10
+// Number of processes: 1
+// Segment size: 10
+// Sorted array: 723097 29932 950337 523896 681650 297913 990177 392067 105981 456852 
+// Sorted array: 29932 105981 297913 392067 456852 523896 681650 723097 950337 990177 
+
+// real    0m0,006s
+// user    0m0,001s
+// sys     0m0,004s
+// [gigl@fedora-gigl Partie 3]$ time ./mergeSortQ1 10 100
+// Array size: 10
+// Number of processes: 100
+// Segment size: 0
+// Sorted array: 937778 687083 782200 528085 155704 772705 927343 190026 637487 97820 
+// Sorted array: 97820 155704 190026 528085 637487 687083 772705 782200 927343 937778 
+
+// real    0m0,025s
+// user    0m0,017s
+// sys     0m0,022s
+
+void write_array_into_file(int left, int right, int *array, int size, const char *action) {
+    FILE *log_file = fopen("sorted_array.txt", "a");
+
+    fprintf(log_file, "%s\n", action);
+    fprintf(log_file, "Start = %d, End = %d, sorted = [", left, right);
+
+    for (int i = left; i <= right; i++) {
+        fprintf(log_file, "%d", array[i]);
+        if (i < right) {
+            fprintf(log_file, ", ");
+        }
+    }
+
+    fprintf(log_file, "]\n");
+    fclose(log_file);
+}
+
+void time_sort(struct timeval *start, struct timeval *end) {
+    long seconds, useconds;
+    seconds = end->tv_sec - start->tv_sec;
+    useconds = end->tv_usec - start->tv_usec;
+
+    printf("Temps d'exécution du tri : %ld secondes et %ld microsecondes\n", seconds, useconds);
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <array_size> <num_processes>\n", argv[0]);
         exit(1);
     }
-    
+
+    int array_size = atoi(argv[1]);
+    int num_processes = atoi(argv[2]);
+    int segment_size = array_size / num_processes;
+    //jai pris exactement meme ligne que note de cours, je ne sais pas pk erreur sur MAP_ANONYMOUS
+    shared_data = mmap(NULL, sizeof(SharedData),PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS,-1, 0);
+
+    shared_data->array = mmap(NULL, array_size * sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS,-1, 0);    
+    shared_data->size = array_size;
+
+    printf("Array size: %d\n", array_size);
+    printf("Number of processes: %d\n", num_processes);
+    printf("Segment size: %d\n", segment_size);
+
     /* Populate the array to test the sort */
     srand(time(NULL));
     for (int i = 0; i < array_size; i++) {
         shared_data->array[i] = rand() % MAX_NUM_SIZE;
     }
 
-    return 0;
+    show_array();//avant sort 
+
+    FILE *log_file = fopen("sorted_array.txt", "w");
+    
+    fprintf(log_file, "Array = [");
+    for (int i = 0; i < array_size; i++) {
+        fprintf(log_file, "%d", shared_data->array[i]);
+        if (i < array_size - 1) {
+            fprintf(log_file, ", ");
+        }
+    }
+    fprintf(log_file, "]\n\n");
+    fclose(log_file);
+
+    pid_t pids[num_processes];
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
+    for (int i = 0; i < num_processes; i++) {
+        pids[i] = fork();
+        if (pids[i] == 0) {
+            int left = i * segment_size;
+            int right = (i == num_processes - 1) ? (array_size - 1) : (left + segment_size - 1);
+            merge_sort(left, right);
+            
+            char action[100];
+            snprintf(action, sizeof(action), "Process %d sorted", i);
+            write_array_into_file(left, right, shared_data->array, shared_data->size, action);
+
+            exit(0);
+        }
+    }
+
+    for (int i = 0; i < num_processes; i++) {
+        waitpid(pids[i], NULL, 0);
+    }
+
+    for (int i = 1; i < num_processes; i++) {
+        merge(0, (i * segment_size) - 1, array_size - 1);
+    }
+    write_array_into_file(0, array_size - 1, shared_data->array, shared_data->size, "\nlast sorted");
+
+
+    show_array();//apres qu il soit sorted
+
+    gettimeofday(&end, NULL);
+    time_sort(&start, &end);
+    
+    munmap(shared_data->array, array_size * sizeof(int));
+    munmap(shared_data, sizeof(SharedData));
+
+    return 0;   
+    
 }
+
 
 void merge_sort( int left, int right) {
     if (left < right) {

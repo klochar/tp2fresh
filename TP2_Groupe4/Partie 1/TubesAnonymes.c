@@ -276,51 +276,30 @@ int main() {
     int pipe1[2], pipe2[2];
     char buffer[BUFFER_SIZE];
     ssize_t nbytes;
+    pipe(pipe1);
+    pipe(pipe2);
 
-    // Création des pipes
-    if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
-        perror("Erreur de création de pipe");
-        exit(1);
-    }
-
-    // Premier processus fils pour `rev < In.txt`
-    pid_t pid1 = fork();
-    if (pid1 == 0) {
-        // Rediriger la sortie standard vers pipe1[1]
+    if (fork() == 0) {
         dup2(pipe1[1], 1);
         close(pipe1[0]);
         close(pipe1[1]);
         
-        // Ouvrir In.txt en lecture seule et le rediriger vers l'entrée standard
         int input_fd = open("In.txt", O_RDONLY);
-        if (input_fd == -1) {
-            perror("Erreur d'ouverture de In.txt");
-            exit(1);
-        }
         dup2(input_fd, 0);
         close(input_fd);
 
         execlp("rev", "rev", NULL);
-        perror("Erreur exec rev");
-        exit(1);
+
     }
 
-    // Attendre que le premier `rev` termine et lire le résultat dans pipe1
-    close(pipe1[1]);  // Fermer l'écriture de pipe1 dans le processus parent
+    close(pipe1[1]);  
     nbytes = read(pipe1[0], buffer, BUFFER_SIZE);
-    buffer[nbytes] = '\0';  // Marquer la fin de chaîne pour l'affichage
+    buffer[nbytes] = '\0';  
     printf("Sortie après le premier rev:\n%s\n\n", buffer);
     close(pipe1[0]);
+    pipe(pipe1);
 
-    // Création du deuxième processus fils pour `rev` (inverser à nouveau)
-    if (pipe(pipe1) == -1) {  // Réutiliser pipe1 pour le second rev
-        perror("Erreur de création de pipe");
-        exit(1);
-    }
-
-    pid_t pid2 = fork();
-    if (pid2 == 0) {
-        // Rediriger l'entrée standard vers pipe1[0] et la sortie standard vers pipe2[1]
+    if (fork() == 0) {
         dup2(pipe1[0], 0);
         dup2(pipe2[1], 1);
 
@@ -330,37 +309,27 @@ int main() {
         close(pipe2[1]);
 
         execlp("rev", "rev", NULL);
-        perror("Erreur exec rev");
-        exit(1);
     }
 
-    // Écrire la sortie du premier rev dans le pipe1 pour le deuxième processus
-    close(pipe1[0]);  // Fermer la lecture de pipe1 dans le processus parent
+    close(pipe1[0]);  
     write(pipe1[1], buffer, nbytes);
     close(pipe1[1]);
 
-    // Attendre que le deuxième `rev` termine et lire le résultat dans pipe2
-    close(pipe2[1]);  // Fermer l'écriture de pipe2 dans le processus parent
+    close(pipe2[1]); 
     nbytes = read(pipe2[0], buffer, BUFFER_SIZE);
     buffer[nbytes] = '\0';
-    printf("Sortie après le deuxième rev (retour à l'original):\n%s\n\n", buffer);
+    printf("Sortie après le deuxième rev:\n%s\n\n", buffer);
     close(pipe2[0]);
 
-    // Troisième processus fils pour `diff - In.txt -s`
-    pid_t pid3 = fork();
-    if (pid3 == 0) {
-        // Rediriger l'entrée standard vers pipe2[0]
+    if (fork() == 0) {
         int input_fd = open("In.txt", O_RDONLY);
         dup2(pipe2[0], 0);
         close(pipe2[0]);
         close(pipe2[1]);
         dup2(input_fd, 0);
         execlp("diff", "diff", "-", "In.txt", "-s", NULL);
-        perror("Erreur exec diff");
-        exit(1);
     }
 
-    // Attendre la fin de tous les processus fils
     while (wait(NULL) > 0);
 
     return 0;
