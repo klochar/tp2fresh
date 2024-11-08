@@ -1,0 +1,38 @@
+1. Si on augmente N+delta on aura pour effect d augmenter le nombre de processus et 
+donc plus de charge pour le cpu (les cores) et donc plus de temps, demonstration avec resultats:
+Prenons pour un array de size 10 avec N processus(je laisserai seulement pour N=1 les demarches de array no sorted et sorted):
+
+N=1:
+Array size: 10
+Number of processes: 1
+Segment size: 10
+NO SORTED array: 120419 145829 808586 323553 845553 900184 323437 670032 850245 225670 
+Sorted array: 120419 145829 225670 323437 323553 670032 808586 845553 850245 900184 
+Temps d'exécution du tri : 0 secondes et 602 microsecondes
+
+N:4
+Array size: 10
+Number of processes: 4
+Segment size: 2
+Temps d'exécution du tri : 0 secondes et 1413 microsecondes
+
+N:8
+Array size: 10
+Number of processes: 8
+Segment size: 1
+Temps d'exécution du tri : 0 secondes et 2760 microsecondes
+
+N:16
+Array size: 10
+Number of processes: 16
+Segment size: 0
+Temps d'exécution du tri : 0 secondes et 6005 microsecondes
+
+donc on voit que lorsqu'on augmente le nombre de processus, cela affecte le temps et donc reduit les performances
+
+2.
+3.
+4. a faire labo(comment log et voir impact)
+5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
+    une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
+

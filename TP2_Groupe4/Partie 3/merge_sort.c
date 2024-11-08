@@ -1,30 +1,11 @@
 #include "merge_sort.h"
-// si on augmente N+delta on aura pour effect d augmenter le nombre de processus et donc plus de charge pour le cpu (les cores) et donc plus de temps, demonstration avec resultats:
-// time ./mergeSortQ1 10 1
-// Array size: 10
-// Number of processes: 1
-// Segment size: 10
-// Sorted array: 723097 29932 950337 523896 681650 297913 990177 392067 105981 456852 
-// Sorted array: 29932 105981 297913 392067 456852 523896 681650 723097 950337 990177 
-
-// real    0m0,006s
-// user    0m0,001s
-// sys     0m0,004s
-// [gigl@fedora-gigl Partie 3]$ time ./mergeSortQ1 10 100
-// Array size: 10
-// Number of processes: 100
-// Segment size: 0
-// Sorted array: 937778 687083 782200 528085 155704 772705 927343 190026 637487 97820 
-// Sorted array: 97820 155704 190026 528085 637487 687083 772705 782200 927343 937778 
-
-// real    0m0,025s
-// user    0m0,017s
-// sys     0m0,022s
 
 void write_array_into_file(int left, int right, int *array, int size, const char *action) {
     FILE *log_file = fopen("sorted_array.txt", "a");
-
-    fprintf(log_file, "%s\n", action);
+    if(action!=NULL){
+        fprintf(log_file, "%s\n", action);
+    }
+    //fprintf(log_file, "%s\n", action);
     fprintf(log_file, "Start = %d, End = %d, sorted = [", left, right);
 
     for (int i = left; i <= right; i++) {
@@ -71,7 +52,7 @@ int main(int argc, char *argv[]) {
         shared_data->array[i] = rand() % MAX_NUM_SIZE;
     }
 
-    show_array();//avant sort 
+    show_array(1);//avant sort 
 
     FILE *log_file = fopen("sorted_array.txt", "w");
     
@@ -82,7 +63,7 @@ int main(int argc, char *argv[]) {
             fprintf(log_file, ", ");
         }
     }
-    fprintf(log_file, "]\n\n");
+    fprintf(log_file, "]\n");
     fclose(log_file);
 
     pid_t pids[num_processes];
@@ -95,10 +76,7 @@ int main(int argc, char *argv[]) {
             int left = i * segment_size;
             int right = (i == num_processes - 1) ? (array_size - 1) : (left + segment_size - 1);
             merge_sort(left, right);
-            
-            char action[100];
-            snprintf(action, sizeof(action), "Process %d sorted", i);
-            write_array_into_file(left, right, shared_data->array, shared_data->size, action);
+            write_array_into_file(left, right, shared_data->array, shared_data->size, NULL);
 
             exit(0);
         }
@@ -111,10 +89,10 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < num_processes; i++) {
         merge(0, (i * segment_size) - 1, array_size - 1);
     }
-    write_array_into_file(0, array_size - 1, shared_data->array, shared_data->size, "\nlast sorted");
+    write_array_into_file(0, array_size - 1, shared_data->array, shared_data->size,NULL );//"\nlast sorted"
 
 
-    show_array();//apres qu il soit sorted
+    show_array(0);//apres qu il soit sorted
 
     gettimeofday(&end, NULL);
     time_sort(&start, &end);
@@ -176,10 +154,19 @@ void merge(int left, int mid, int right) {
     }
 }
 
-void show_array(){
+void show_array(int i){
+    if(i==1){
+        printf("NO SORTED array: ");
+        for (int i = 0; i < shared_data->size; i++) {
+            printf("%d ", shared_data->array[i]);
+        }
+        printf("\n");
+        return ;
+    }
     printf("Sorted array: ");
     for (int i = 0; i < shared_data->size; i++) {
         printf("%d ", shared_data->array[i]);
     }
     printf("\n");
 }
+

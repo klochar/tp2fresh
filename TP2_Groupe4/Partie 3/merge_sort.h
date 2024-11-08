@@ -31,5 +31,5 @@ struct timeval start_time, end_time;
 void merge_sort( int left, int right);
 void merge(int left, int mid, int right);
 void execute_merge_sort(int start, int end, int num_processes);
-void show_array();
+void show_array(int i);
 void write_array_into_file(int left, int right, int *array, int size, const char *action);
