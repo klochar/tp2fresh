@@ -24,9 +24,9 @@ int main(int argc, char** argv) {
     // QUESTION 2 --------------------------------------
     // compile question 2
 
-    // if (!fork()) {
-    //     execlp("gcc", "gcc", "-o", "ansq2", "TubesAnonymes.c", NULL);
-    // }
+    if (!fork()) {
+        execlp("gcc", "gcc", "-o", "ansq2", "TubesAnonymes.c", NULL);
+    }
     
     wait(NULL);
     

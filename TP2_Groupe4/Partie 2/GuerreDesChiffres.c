@@ -316,6 +316,149 @@
 //     return 0;
 // }
 
+
+
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <pthread.h>
+// #include <unistd.h>
+// #include <semaphore.h>
+// #include <signal.h>
+// #include <time.h>
+
+// int entre_buffer = 0;
+// int sortie_buffer = 0;
+// int somme_produits = 0;
+// int somme_consom = 0;
+// int chiffres_produits = 0;
+// int chiffres_consommes = 0;
+// int nmbProd, nmbCons, taille_buffer;
+// int *buffer;
+// sem_t mutex, empty, full;
+// volatile sig_atomic_t flag_de_fin = 0;
+
+// void* producteur(void* pid) {
+//     int id = *(int *)pid;
+//     while (1) {
+//         int x = (rand() % 9) + 1; 
+//         sem_wait(&empty); 
+//         sem_wait(&mutex); 
+        
+//         buffer[entre_buffer] = x;
+//         entre_buffer = (entre_buffer + 1) % taille_buffer;
+        
+//         somme_produits += x;
+//         chiffres_produits++;
+        
+//         sem_post(&mutex); 
+//         sem_post(&full); 
+        
+//         if (flag_de_fin) break; 
+//     }
+//     pthread_exit(NULL);
+// }
+
+// void* consommateur(void* cid) {
+//     int id = *(int *)cid;
+//     while (1) {
+//         sem_wait(&full); 
+//         sem_wait(&mutex); 
+
+//         int x = buffer[sortie_buffer]; 
+//         sortie_buffer = (sortie_buffer + 1) % taille_buffer;
+
+//         if (x == 0) { 
+//             sem_post(&mutex);
+//             break;
+//         }
+        
+//         somme_consom += x;
+//         chiffres_consommes++;
+        
+//         sem_post(&mutex); 
+//         sem_post(&empty);
+//     }
+//     pthread_exit(NULL);
+// }
+
+// void alarme(int sig) {
+//     flag_de_fin = 1;
+// }
+
+// int main(int argc, char* argv[]) {
+//     // if (argc < 4) {
+//     //     fprintf(stderr, "Usage: %s <nb producteurs> <nb consommateurs> <taille buffer>\n", argv[0]);
+//     //     exit(EXIT_FAILURE);
+//     // }
+
+//     nmbProd = atoi(argv[1]);
+//     nmbCons = atoi(argv[2]);
+//     taille_buffer = atoi(argv[3]);
+//     buffer = (int *)malloc(taille_buffer * sizeof(int));
+
+//     srand(time(NULL));
+    
+//     sem_init(&mutex, 0, 1);        
+//     sem_init(&empty, 0, taille_buffer); 
+//     sem_init(&full, 0, 0);         
+
+//     pthread_t producers[nmbProd];
+//     int producer_ids[nmbProd];
+//     for (int i = 0; i < nmbProd; i++) {
+//         producer_ids[i] = i;
+//         pthread_create(&producers[i], NULL, producteur, &producer_ids[i]);
+//         // if (pthread_create(&producers[i], NULL, producteur, &producer_ids[i]) != 0) {
+//         //     perror("Erreur lors de la création d'un thread producteur");
+//         //     exit(EXIT_FAILURE);
+//         // }
+//     }
+
+//     pthread_t consumers[nmbCons];
+//     int consumer_ids[nmbCons];
+//     for (int i = 0; i < nmbCons; i++) {
+//         consumer_ids[i] = i;
+//         pthread_create(&consumers[i], NULL, consommateur, &consumer_ids[i]);
+//         // if (pthread_create(&consumers[i], NULL, consommateur, &consumer_ids[i]) != 0) {
+//         //     perror("Erreur lors de la création d'un thread consommateur");
+//         //     exit(EXIT_FAILURE);
+//         // }
+//     }
+
+//     signal(SIGALRM, alarme);
+//     alarm(1); 
+
+//     for (int i = 0; i < nmbProd; i++) {
+//         pthread_join(producers[i], NULL);
+//     }
+
+//     for (int i = 0; i < nmbCons; i++) {
+//         sem_wait(&empty);
+//         sem_wait(&mutex);
+//         buffer[entre_buffer] = 0;
+//         entre_buffer = (entre_buffer + 1) % taille_buffer;
+//         sem_post(&mutex);
+//         sem_post(&full);
+//     }
+
+//     for (int i = 0; i < nmbCons; i++) {
+//         pthread_join(consumers[i], NULL);
+//     }
+
+//     printf("Somme des chiffres produits: %d\n", somme_produits);
+//     printf("Somme des chiffres consumed: %d\n", somme_consom);
+//     printf("Nombre de chiffres produits: %d\n", chiffres_produits);
+//     printf("Nombre de chiffres consumed: %d\n", chiffres_consommes);
+
+//     free(buffer);
+//     sem_destroy(&mutex);
+//     sem_destroy(&empty);
+//     sem_destroy(&full);
+
+//     return 0;
+// }
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -324,133 +467,120 @@
 #include <signal.h>
 #include <time.h>
 
-int entre_buffer = 0;
-int sortie_buffer = 0;
-int somme_produits = 0;
-int somme_consom = 0;
-int chiffres_produits = 0;
-int chiffres_consommes = 0;
-int nmbProd, nmbCons, taille_buffer;
+int index_prod = 0;
+int index_cons = 0;
+int total_produit = 0;
+int total_consomme = 0;
+int count_produit = 0;
+int count_consomme = 0;
+int nb_producteurs, nb_consommateurs, taille_du_buffer;
 int *buffer;
-sem_t mutex, empty, full;
-volatile sig_atomic_t flag_de_fin = 0;
+sem_t mutex, vide, plein;
+volatile sig_atomic_t fin = 0;
 
-void* producteur(void* pid) {
+void* fonction_producteur(void* pid) {
     int id = *(int *)pid;
     while (1) {
-        int x = (rand() % 9) + 1; 
-        sem_wait(&empty); 
-        sem_wait(&mutex); 
+        int item = (rand() % 9) + 1;
+        sem_wait(&vide);
+        sem_wait(&mutex);
         
-        buffer[entre_buffer] = x;
-        entre_buffer = (entre_buffer + 1) % taille_buffer;
+        buffer[index_prod] = item;
+        index_prod = (index_prod + 1) % taille_du_buffer;
         
-        somme_produits += x;
-        chiffres_produits++;
+        total_produit += item;
+        count_produit++;
         
-        sem_post(&mutex); 
-        sem_post(&full); 
+        sem_post(&mutex);
+        sem_post(&plein);
         
-        if (flag_de_fin) break; 
+        if (fin) break;
     }
     pthread_exit(NULL);
 }
 
-void* consommateur(void* cid) {
+void* fonction_consommateur(void* cid) {
     int id = *(int *)cid;
     while (1) {
-        sem_wait(&full); 
-        sem_wait(&mutex); 
+        sem_wait(&plein);
+        sem_wait(&mutex);
 
-        int x = buffer[sortie_buffer]; 
-        sortie_buffer = (sortie_buffer + 1) % taille_buffer;
+        int item = buffer[index_cons];
+        index_cons = (index_cons + 1) % taille_du_buffer;
 
-        if (x == 0) { 
+        if (item == 0) {
             sem_post(&mutex);
             break;
         }
         
-        somme_consom += x;
-        chiffres_consommes++;
+        total_consomme += item;
+        count_consomme++;
         
-        sem_post(&mutex); 
-        sem_post(&empty);
+        sem_post(&mutex);
+        sem_post(&vide);
     }
     pthread_exit(NULL);
 }
 
-void alarme(int sig) {
-    flag_de_fin = 1;
+void signal_alarme(int sig) {
+    fin = 1;
 }
 
 int main(int argc, char* argv[]) {
-    // if (argc < 4) {
-    //     fprintf(stderr, "Usage: %s <nb producteurs> <nb consommateurs> <taille buffer>\n", argv[0]);
-    //     exit(EXIT_FAILURE);
-    // }
-
-    nmbProd = atoi(argv[1]);
-    nmbCons = atoi(argv[2]);
-    taille_buffer = atoi(argv[3]);
-    buffer = (int *)malloc(taille_buffer * sizeof(int));
+    nb_producteurs = atoi(argv[1]);
+    nb_consommateurs = atoi(argv[2]);
+    taille_du_buffer = atoi(argv[3]);
+    buffer = (int *)malloc(taille_du_buffer * sizeof(int));
 
     srand(time(NULL));
     
-    sem_init(&mutex, 0, 1);        
-    sem_init(&empty, 0, taille_buffer); 
-    sem_init(&full, 0, 0);         
+    sem_init(&mutex, 0, 1);
+    sem_init(&vide, 0, taille_du_buffer);
+    sem_init(&plein, 0, 0);
 
-    pthread_t producers[nmbProd];
-    int producer_ids[nmbProd];
-    for (int i = 0; i < nmbProd; i++) {
-        producer_ids[i] = i;
-        pthread_create(&producers[i], NULL, producteur, &producer_ids[i]);
-        // if (pthread_create(&producers[i], NULL, producteur, &producer_ids[i]) != 0) {
-        //     perror("Erreur lors de la création d'un thread producteur");
-        //     exit(EXIT_FAILURE);
-        // }
+    pthread_t producteurs[nb_producteurs];
+    int id_producteurs[nb_producteurs];
+    for (int i = 0; i < nb_producteurs; i++) {
+        id_producteurs[i] = i;
+        pthread_create(&producteurs[i], NULL, fonction_producteur, &id_producteurs[i]);
     }
 
-    pthread_t consumers[nmbCons];
-    int consumer_ids[nmbCons];
-    for (int i = 0; i < nmbCons; i++) {
-        consumer_ids[i] = i;
-        pthread_create(&consumers[i], NULL, consommateur, &consumer_ids[i]);
-        // if (pthread_create(&consumers[i], NULL, consommateur, &consumer_ids[i]) != 0) {
-        //     perror("Erreur lors de la création d'un thread consommateur");
-        //     exit(EXIT_FAILURE);
-        // }
+    pthread_t consommateurs[nb_consommateurs];
+    int id_consommateurs[nb_consommateurs];
+    for (int i = 0; i < nb_consommateurs; i++) {
+        id_consommateurs[i] = i;
+        pthread_create(&consommateurs[i], NULL, fonction_consommateur, &id_consommateurs[i]);
     }
 
-    signal(SIGALRM, alarme);
+    signal(SIGALRM, signal_alarme);
     alarm(1); 
 
-    for (int i = 0; i < nmbProd; i++) {
-        pthread_join(producers[i], NULL);
+    for (int i = 0; i < nb_producteurs; i++) {
+        pthread_join(producteurs[i], NULL);
     }
 
-    for (int i = 0; i < nmbCons; i++) {
-        sem_wait(&empty);
+    for (int i = 0; i < nb_consommateurs; i++) {
+        sem_wait(&vide);
         sem_wait(&mutex);
-        buffer[entre_buffer] = 0;
-        entre_buffer = (entre_buffer + 1) % taille_buffer;
+        buffer[index_prod] = 0;
+        index_prod = (index_prod + 1) % taille_du_buffer;
         sem_post(&mutex);
-        sem_post(&full);
+        sem_post(&plein);
     }
 
-    for (int i = 0; i < nmbCons; i++) {
-        pthread_join(consumers[i], NULL);
+    for (int i = 0; i < nb_consommateurs; i++) {
+        pthread_join(consommateurs[i], NULL);
     }
 
-    printf("Somme des chiffres produits: %d\n", somme_produits);
-    printf("Somme des chiffres consumed: %d\n", somme_consom);
-    printf("Nombre de chiffres produits: %d\n", chiffres_produits);
-    printf("Nombre de chiffres consumed: %d\n", chiffres_consommes);
+    printf("Total des chiffres produits : %d\n", total_produit);
+    printf("Total des chiffres consommés : %d\n", total_consomme);
+    printf("Nombre de chiffres produits : %d\n", count_produit);
+    printf("Nombre de chiffres consommés : %d\n", count_consomme);
 
     free(buffer);
     sem_destroy(&mutex);
-    sem_destroy(&empty);
-    sem_destroy(&full);
+    sem_destroy(&vide);
+    sem_destroy(&plein);
 
     return 0;
 }

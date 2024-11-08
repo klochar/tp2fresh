@@ -292,12 +292,12 @@ int main() {
 
     }
 
-    close(pipe1[1]);  
-    nbytes = read(pipe1[0], buffer, BUFFER_SIZE);
-    buffer[nbytes] = '\0';  
-    printf("Sortie après le premier rev:\n%s\n\n", buffer);
-    close(pipe1[0]);
-    pipe(pipe1);
+    // close(pipe1[1]);  
+    // nbytes = read(pipe1[0], buffer, BUFFER_SIZE);
+    // buffer[nbytes] = '\0';  
+    // printf("Sortie après le premier rev:\n%s\n\n", buffer);
+    // close(pipe1[0]);
+    // pipe(pipe1);
 
     if (fork() == 0) {
         dup2(pipe1[0], 0);
@@ -315,11 +315,11 @@ int main() {
     write(pipe1[1], buffer, nbytes);
     close(pipe1[1]);
 
-    close(pipe2[1]); 
-    nbytes = read(pipe2[0], buffer, BUFFER_SIZE);
-    buffer[nbytes] = '\0';
-    printf("Sortie après le deuxième rev:\n%s\n\n", buffer);
-    close(pipe2[0]);
+    // close(pipe2[1]); 
+    // nbytes = read(pipe2[0], buffer, BUFFER_SIZE);
+    // buffer[nbytes] = '\0';
+    // printf("Sortie après le deuxième rev:\n%s\n\n", buffer);
+    // close(pipe2[0]);
 
     if (fork() == 0) {
         int input_fd = open("In.txt", O_RDONLY);
