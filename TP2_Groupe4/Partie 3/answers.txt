@@ -83,11 +83,9 @@ Segment size: 1
 Temps d'exécution du tri : 0 secondes et 28361 microsecondes
 
 
-LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
-LORSQUE N=8 on a que le updated est 1,20 fois plus rapide
-JUSTIFIER POURQUOI 1 ET 16 sont pas ouf
 
-2.
+
+2.COMPARE AVEC N=1 ET N=plusieurs processus et non le updated
 3.
 4. a faire labo(comment log et voir impact)
     AVANT DE COMMENTER LOG 
@@ -105,5 +103,10 @@ JUSTIFIER POURQUOI 1 ET 16 sont pas ouf
 5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
     une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
 
+    LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
+    LORSQUE N=8 on a que le updated est 1,20 fois plus rapide
+    JUSTIFIER POURQUOI 1 ET 16 sont pas ouf
+
+    ces resultats sont calcule a partir des temps obtenu en haut
 
 je trouve que les questions ne sont vraiment pas claires
