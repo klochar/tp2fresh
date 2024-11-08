@@ -32,6 +32,9 @@ Number of processes: 16
 Segment size: 0
 Temps d'exécution du tri : 0 secondes et 5702 microsecondes
 
+donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps et donc reduit les performances
+
+
 1.Générez des résultats de temps d’éxécution de votre algorithme parallèle et de l’algorithme initial.
 Assurez-vous que les résultats soient représentatifs de la réalité, sinon vos réponses aux questions suiv-
 antes ne seront pas évaluées. Vous devez générer des résultats pour les valeurs suivantes du nombre N
@@ -79,13 +82,28 @@ Number of threads: 16
 Segment size: 1
 Temps d'exécution du tri : 0 secondes et 28361 microsecondes
 
-donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps et donc reduit les performances
 
+LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
+LORSQUE N=8 on a que le updated est 1,20 fois plus rapide
+JUSTIFIER POURQUOI 1 ET 16 sont pas ouf
 
 2.
 3.
 4. a faire labo(comment log et voir impact)
+    AVANT DE COMMENTER LOG 
+    Array size: 20
+    Number of processes: 2
+    Segment size: 10
+    Temps d'exécution du tri : 0 secondes et 11896 microsecondes
+
+    APRES DE COMMENTER LOG 
+    Array size: 20
+    Number of processes: 2
+    Segment size: 10
+    Temps d'exécution du tri : 0 secondes et 6608 microsecondes
+
 5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
     une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
 
 
+je trouve que les questions ne sont vraiment pas claires
