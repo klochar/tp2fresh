@@ -70,18 +70,21 @@ donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps
     Segment size: 10
     Temps d'exec du tri : 0 secondes et 6608 microsecondes
 
+    on a donc environ un gain de 50% de temps en mettant en commantaire le code de journalisation
+    plus techniquement, La complexite de write_array_into_file est de O(n) a cause du for loop et la complexite de time_sort est O(1) (que des affectations), donc le fait de commenter write_array_into_file aura un impact lineaire.
+
 
 5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
     une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
 
-    Lorsque N=1 on ne tire pas avantage du multithreading (car 1 seul process), donc le temps est desatantageux
+    Lorsque N=1 on ne tire pas avantage du multithreading (car 1 seul thread), donc le temps est desatantageux et meme plus desavantageux sans thread car il y a une gestion des threads
     LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
     LORSQUE N=8 on a que le updated est 1,20 fois plus rapide
-    LORSQUE N=16 on voit que l'on prend plus de temps car on depasse le nombre de cores du cpu (qui est de 14 cores)
+    LORSQUE N=16 on voit que l'on prend plus de temps car on depasse le nombre de cores du cpu (qui est de 14 cores), donc au dela de la limite, l'ajout de threads ne permettra pas de gagner du temps
 
     ces resultats sont calcule a partir des temps obtenu ci dessous
 
-j utilise les PC de polytechnique pour ce numero
+j utilise les PC de polytechnique pour ce numero (14cores)
 SOIT A merge_sort NON AMELIORER et B merge_sort AMELIORER (multithreading) 
 
 N:1
