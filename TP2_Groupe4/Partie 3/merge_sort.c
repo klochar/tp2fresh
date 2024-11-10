@@ -8,10 +8,13 @@
 #include "merge_sort.h"
 
 void write_array_into_file(int left, int right, int *array, int size, const char *action) {
+    sem_wait(mutex);
+
     FILE *log_file = fopen("sorted_array.txt", "a");
-    if(action!=NULL){
+    if (action != NULL) {
         fprintf(log_file, "%s\n", action);
     }
+
     //fprintf(log_file, "%s\n", action);
     fprintf(log_file, "Start = %d, End = %d, sorted = [", left, right);
 
@@ -21,9 +24,10 @@ void write_array_into_file(int left, int right, int *array, int size, const char
             fprintf(log_file, ", ");
         }
     }
-
     fprintf(log_file, "]\n");
     fclose(log_file);
+
+    sem_post(mutex);
 }
 
 void time_sort(struct timeval *start, struct timeval *end) {
@@ -39,6 +43,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <array_size> <num_processes>\n", argv[0]);
         exit(1);
     }
+    mutex = sem_open("/mutex", O_CREAT, 0644, 1);
 
     int array_size = atoi(argv[1]);
     int num_processes = atoi(argv[2]);
@@ -74,8 +79,7 @@ int main(int argc, char *argv[]) {
     fclose(log_file);
 
     pid_t pids[num_processes];
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start_time, NULL);
 
     for (int i = 0; i < num_processes; i++) {
         pids[i] = fork();
@@ -101,12 +105,14 @@ int main(int argc, char *argv[]) {
 
     show_array(0);//apres qu il soit sorted
 
-    gettimeofday(&end, NULL);
-    time_sort(&start, &end);
+    gettimeofday(&end_time, NULL);
+    time_sort(&start_time, &end_time);
     
     munmap(shared_data->array, array_size * sizeof(int));
     munmap(shared_data, sizeof(SharedData));
 
+    sem_close(mutex);
+    sem_unlink("/mutex");
     return 0;   
     
 }

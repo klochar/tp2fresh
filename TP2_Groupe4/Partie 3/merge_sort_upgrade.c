@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
     int array_size = atoi(argv[1]);
     int num_threads = atoi(argv[2]);
     int segment_size = array_size / num_threads;
+    mutex = sem_open("/mutex", O_CREAT, 0644, 1);
     //jai pris exactement meme ligne que note de cours, je ne sais pas pk erreur sur MAP_ANON
     shared_data = mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
     
@@ -66,8 +67,7 @@ int main(int argc, char *argv[]) {
     fclose(log_file);
 
     pthread_t threads[num_threads];
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start_time, NULL);
 
     for (int i = 0; i < num_threads; i++) {
         int *arg = malloc(sizeof(*arg));
@@ -87,20 +87,27 @@ int main(int argc, char *argv[]) {
 
     // show_array(0); // Affiche le tableau après le tri
 
-    gettimeofday(&end, NULL);
-    time_sort(&start, &end);
+    gettimeofday(&end_time, NULL);
+    time_sort(&start_time, &end_time);
 
     munmap(shared_data->array, array_size * sizeof(int));
     munmap(shared_data, sizeof(SharedData));
+
+    sem_close(mutex);
+    sem_unlink("/mutex");
 
     return 0;
 }
 
 void write_array_into_file(int left, int right, int *array, int size, const char *action) {
+    sem_wait(mutex);
+
     FILE *log_file = fopen("sorted_array.txt", "a");
     if (action != NULL) {
         fprintf(log_file, "%s\n", action);
     }
+
+    //fprintf(log_file, "%s\n", action);
     fprintf(log_file, "Start = %d, End = %d, sorted = [", left, right);
 
     for (int i = left; i <= right; i++) {
@@ -109,9 +116,10 @@ void write_array_into_file(int left, int right, int *array, int size, const char
             fprintf(log_file, ", ");
         }
     }
-
     fprintf(log_file, "]\n");
     fclose(log_file);
+
+    sem_post(mutex);
 }
 
 
