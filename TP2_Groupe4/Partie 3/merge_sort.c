@@ -1,3 +1,10 @@
+/*
+ * Ecole Polytechnique Montreal - GIGL
+ * Automne 2024
+ * merge_sort.c
+ * Ghobrial, Mina Youhanna Helmi / 2214988
+ * Rouabah, Abdelmounaim / 2211513
+*/
 #include "merge_sort.h"
 
 void write_array_into_file(int left, int right, int *array, int size, const char *action) {
@@ -24,7 +31,7 @@ void time_sort(struct timeval *start, struct timeval *end) {
     seconds = end->tv_sec - start->tv_sec;
     useconds = end->tv_usec - start->tv_usec;
 
-    printf("Temps d'exécution du tri : %ld secondes et %ld microsecondes\n", seconds, useconds);
+    printf("Temps d'exec du tri : %ld secondes et %ld microsecondes\n", seconds, useconds);
 }
 
 int main(int argc, char *argv[]) {
@@ -36,10 +43,10 @@ int main(int argc, char *argv[]) {
     int array_size = atoi(argv[1]);
     int num_processes = atoi(argv[2]);
     int segment_size = array_size / num_processes;
-    //jai pris exactement meme ligne que note de cours, je ne sais pas pk erreur sur MAP_ANONYMOUS
-    shared_data = mmap(NULL, sizeof(SharedData),PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS,-1, 0);
+    //jai pris exactement meme ligne que note de cours, je ne sais pas pk erreur sur MAP_ANON
+    shared_data = mmap(NULL, sizeof(SharedData),PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON,-1, 0);
 
-    shared_data->array = mmap(NULL, array_size * sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS,-1, 0);    
+    shared_data->array = mmap(NULL, array_size * sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON,-1, 0);    
     shared_data->size = array_size;
 
     printf("Array size: %d\n", array_size);

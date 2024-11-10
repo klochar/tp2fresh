@@ -2,9 +2,14 @@
 coeurs disponibles. Quel sera l’impact de ce changement sur la performance de l’algorithme?
 
  Si on augmente N+delta on aura pour effect d augmenter le nombre de processus et 
-donc plus de charge pour le cpu (les cores) et donc plus de temps, demonstration avec resultats:
+donc augmenter la charge sur le cpu et donc devra prendre plus de temps si l'on excede le nombre de cores du cpu.
 Prenons pour un array de size 10 avec N processus(je laisserai seulement pour N=1 les demarches de array no sorted et sorted):
-ce temps a ete fait sur ma machine pour ce numero
+ce temps a ete fait sur ma machine virtuel pour ce numero (8 cores)
+
+1.Générez des résultats de temps d’éxécution de votre algorithme parallèle et de l’algorithme initial.
+Assurez-vous que les résultats soient représentatifs de la réalité, sinon vos réponses aux questions suiv-
+antes ne seront pas évaluées. Vous devez générer des résultats pour les valeurs suivantes du nombre N
+de processus, 
 
 N=1:
 Array size: 10
@@ -12,101 +17,98 @@ Number of processes: 1
 Segment size: 10
 NO SORTED array: 120419 145829 808586 323553 845553 900184 323437 670032 850245 225670 
 Sorted array: 120419 145829 225670 323437 323553 670032 808586 845553 850245 900184 
-Temps d'exécution du tri : 0 secondes et 602 microsecondes
+Temps d'exec du tri : 0 secondes et 602 microsecondes
 
 N=4
 Array size: 10
 Number of processes: 4
 Segment size: 2
-Temps d'exécution du tri : 0 secondes et 1654 microsecondes
+Temps d'exec du tri : 0 secondes et 1654 microsecondes
 
 N=8
 Array size: 10
 Number of processes: 8
 Segment size: 1
-Temps d'exécution du tri : 0 secondes et 2530 microsecondes
+Temps d'exec du tri : 0 secondes et 2530 microsecondes
 
 N=16
 Array size: 10
 Number of processes: 16
 Segment size: 0
-Temps d'exécution du tri : 0 secondes et 5702 microsecondes
+Temps d'exec du tri : 0 secondes et 5702 microsecondes
 
 donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps et donc reduit les performances
 
+2. le programme est plus lent si on ajoute le nombre de process 
 
-1.Générez des résultats de temps d’éxécution de votre algorithme parallèle et de l’algorithme initial.
-Assurez-vous que les résultats soient représentatifs de la réalité, sinon vos réponses aux questions suiv-
-antes ne seront pas évaluées. Vous devez générer des résultats pour les valeurs suivantes du nombre N
-de processus, j utilise les PC de polytechnique pour ce numero
-SOIT A merge sort non ameliore et B merge sort ameliore (multithreading) 
+3.
+
+4.  AVANT DE COMMENTER LOG 
+    Array size: 20
+    Number of processes: 2
+    Segment size: 10
+    Temps d'exec du tri : 0 secondes et 11896 microsecondes
+
+    APRES DE COMMENTER LOG 
+    Array size: 20
+    Number of processes: 2
+    Segment size: 10
+    Temps d'exec du tri : 0 secondes et 6608 microsecondes
+
+
+5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
+    une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
+
+    Lorsque N=1 on ne tire pas avantage du multithreading (car 1 seul process), donc le temps est desatantageux
+    LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
+    LORSQUE N=8 on a que le updated est 1,20 fois plus rapide
+    LORSQUE N=16 on voit que l'on prend plus de temps car on depasse le nombre de cores du cpu (qui est de 14 cores)
+
+    ces resultats sont calcule a partir des temps obtenu ci dessous
+
+j utilise les PC de polytechnique pour ce numero
+SOIT A merge_sort NON AMELIORER et B merge_sort AMELIORER (multithreading) 
 
 N:1
 A:Array size: 25
 Number of processes: 1
 Segment size: 25
-Temps d'exécution du tri : 0 secondes et 8511 microsecondes
+Temps d'exec du tri : 0 secondes et 8511 microsecondes
 B:Array size: 25
 Number of threads: 1
 Segment size: 25
-Temps d'exécution du tri : 0 secondes et 22271 microsecondes
+Temps d'exec du tri : 0 secondes et 22271 microsecondes
 
 N:4
 A:Array size: 25
 Number of processes: 4
 Segment size: 6
-Temps d'exécution du tri : 0 secondes et 17169 microsecondes
+Temps d'exec du tri : 0 secondes et 17169 microsecondes
 B:Array size: 25
 Number of threads: 4
 Segment size: 6
-Temps d'exécution du tri : 0 secondes et 10109 microsecondes
+Temps d'exec du tri : 0 secondes et 10109 microsecondes
 
 N:8
 A:Array size: 25
 Number of processes: 8
 Segment size: 3
-Temps d'exécution du tri : 0 secondes et 21254 microsecondes
+Temps d'exec du tri : 0 secondes et 21254 microsecondes
 B:Array size: 25
 Number of threads: 8
 Segment size: 3
-Temps d'exécution du tri : 0 secondes et 17654 microsecondes
+Temps d'exec du tri : 0 secondes et 17654 microsecondes
 
 ICI A CAUSE DU CPU 14(CORES) c pour ca que c pas plus rapide
 N:16
 A:Array size: 25
 Number of processes: 16
 Segment size: 1
-Temps d'exécution du tri : 0 secondes et 26634 microsecondes
+Temps d'exec du tri : 0 secondes et 26634 microsecondes
 B:Array size: 25
 Number of threads: 16
 Segment size: 1
-Temps d'exécution du tri : 0 secondes et 28361 microsecondes
+Temps d'exec du tri : 0 secondes et 28361 microsecondes
 
-
-
-
-2.COMPARE AVEC N=1 ET N=plusieurs processus et non le updated
-3.
-4. a faire labo(comment log et voir impact)
-    AVANT DE COMMENTER LOG 
-    Array size: 20
-    Number of processes: 2
-    Segment size: 10
-    Temps d'exécution du tri : 0 secondes et 11896 microsecondes
-
-    APRES DE COMMENTER LOG 
-    Array size: 20
-    Number of processes: 2
-    Segment size: 10
-    Temps d'exécution du tri : 0 secondes et 6608 microsecondes
-
-5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
-    une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
-
-    LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
-    LORSQUE N=8 on a que le updated est 1,20 fois plus rapide
-    JUSTIFIER POURQUOI 1 ET 16 sont pas ouf
-
-    ces resultats sont calcule a partir des temps obtenu en haut
 
 je trouve que les questions ne sont vraiment pas claires
