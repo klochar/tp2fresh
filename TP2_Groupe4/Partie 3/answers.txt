@@ -1,10 +1,25 @@
+/*
+ * Ecole Polytechnique Montreal - GIGL
+ * Automne 2024
+ * answers.txt
+ * Ghobrial, Mina Youhanna Helmi / 2214988
+ * Rouabah, Abdelmounaim / 2211513
+*/
+
+
 1.Supposez que vous faites passer le nombre de processus de N à N + δ, où N correspond au nombre de
 coeurs disponibles. Quel sera l’impact de ce changement sur la performance de l’algorithme?
 
  Si on augmente N+delta on aura pour effect d augmenter le nombre de processus et 
-donc augmenter la charge sur le cpu et donc devra prendre plus de temps si l'on excede le nombre de cores du cpu.
+donc augmenter la charge sur le cpu car on excede le nombre de cores du cpu et donc le processus va devoir attendre pour une prenre une ressource.
 Prenons pour un array de size 10 avec N processus(je laisserai seulement pour N=1 les demarches de array no sorted et sorted):
-ce temps a ete fait sur ma machine virtuel pour ce numero (8 cores)
+ce test a ete fait sur ma machine virtuel pour ce numero (1 cores et 2 threads) :
+  Nom de modèle :                         Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+    Famille de processeur :               6
+    Modèle :                              85
+    Thread(s) par cœur :                  2
+    Cœur(s) par socket :                  1
+
 
 1.Générez des résultats de temps d’éxécution de votre algorithme parallèle et de l’algorithme initial.
 Assurez-vous que les résultats soient représentatifs de la réalité, sinon vos réponses aux questions suiv-
@@ -39,9 +54,9 @@ Temps d'exec du tri : 0 secondes et 5702 microsecondes
 
 donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps et donc reduit les performances
 
-2. le programme est plus lent si on ajoute le nombre de process 
+2. Dans ce cas, il est tres difficile de voir une amelioration car le CPU que j'utilise est de 1 cores et donc c'est pour cela qu'il est tres desavantageux de faire avec plusieurs process
 
-3.
+3. NON puisque comme dit auparavant, un CPU de 1 cores et donc de plus que j'augmente le nombre de N>1 alors le temps d'execution sera plus grand
 
 4.  AVANT DE COMMENTER LOG 
     Array size: 20
@@ -99,7 +114,7 @@ Number of threads: 8
 Segment size: 3
 Temps d'exec du tri : 0 secondes et 17654 microsecondes
 
-ICI A CAUSE DU CPU 14(CORES) c pour ca que c pas plus rapide
+ICI A CAUSE DU CPU 14(CORES) on a des performaces qui sont moindres 
 N:16
 A:Array size: 25
 Number of processes: 16
@@ -110,5 +125,3 @@ Number of threads: 16
 Segment size: 1
 Temps d'exec du tri : 0 secondes et 28361 microsecondes
 
-
-je trouve que les questions ne sont vraiment pas claires
