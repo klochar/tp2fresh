@@ -54,9 +54,10 @@ Temps d'exec du tri : 0 secondes et 5702 microsecondes
 
 donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps et donc reduit les performances
 
-2. Dans ce cas, il est tres difficile de voir une amelioration car le CPU que j'utilise est de 1 cores et donc c'est pour cela qu'il est tres desavantageux de faire avec plusieurs process
+2. Dans ce cas, il est tres difficile de voir une amelioration car le CPU que j'utilise est de 1 cores et donc c'est pour cela qu'il est tres desavantageux de faire avec plusieurs processus,
+    le programme avec la version parallele est beaucoup plus lente a mesure qu'on augmente le nombre de processus N.
 
-3. NON puisque comme dit auparavant, un CPU de 1 cores et donc de plus que j'augmente le nombre de N>1 alors le temps d'execution sera plus grand
+3. oui puisque pour un array de size plus petit, la synchronisation est meilleur que le parallelisme, alors qu un array de size plus grand, le parallelisme est meilleur et plus performant.
 
 4.  AVANT DE COMMENTER LOG 
     Array size: 20
@@ -70,12 +71,13 @@ donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps
     Segment size: 10
     Temps d'exec du tri : 0 secondes et 6608 microsecondes
 
-    on a donc environ un gain de 50% de temps en mettant en commantaire le code de journalisation
+    on a donc environ un gain de 50% de temps en mettant en commantaire le code de journalisation, et si l'on fait plusieurs autres test, on remarque que pour un N plus grand, il y aura une amelioration plus importante.
     plus techniquement, La complexite de write_array_into_file est de O(n) a cause du for loop et la complexite de time_sort est O(1) (que des affectations), donc le fait de commenter write_array_into_file aura un impact lineaire.
 
 
-5. En premier lieu, on pourrait le faire en multithreaded, de facon a utiliser les cores du CPU pour les process qu'il va creer afin de faire par exemple la separation et le merge des array
-    une deuxieme facon serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
+5.  En premier lieu, ,serait d allouer la memoire de facon dynamique de facon si on utilise pas un grand nombre de memoire, alors on allouera moins d esspace, mais certes, l allocation dynamique est plus lourde en general
+    
+    une deuxieme facon, on pourrait faire des threads a la place des processus, memoire est already partage par les threads et pas besoin de mmap
 
     Lorsque N=1 on ne tire pas avantage du multithreading (car 1 seul thread), donc le temps est desatantageux et meme plus desavantageux sans thread car il y a une gestion des threads
     LORSQUE N=4 on a que le updated est 1,70 fois plus rapide
@@ -85,7 +87,7 @@ donc on voit que losqu'on augmente le nombre de processus, cela affecte le temps
     ces resultats sont calcule a partir des temps obtenu ci dessous
 
 j utilise les PC de polytechnique pour ce numero (14cores)
-SOIT A merge_sort NON AMELIORER et B merge_sort AMELIORER (multithreading) 
+SOIT A merge_sort NON-AMELIORER et B merge_sort AMELIORER (multithreading) 
 
 N:1
 A:Array size: 25
