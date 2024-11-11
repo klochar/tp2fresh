@@ -24,7 +24,8 @@ int *buffer;
 sem_t mutex, vide, plein;
 volatile sig_atomic_t fin = 0;
 
-void* fonction_producteur(void* pid) {
+void* producteur(void* pid) {
+    //je ne sais pas sert a quoi ?!
     int id = *(int *)pid;
     while (1) {
         int item = (rand() % 9) + 1;
@@ -45,9 +46,8 @@ void* fonction_producteur(void* pid) {
     pthread_exit(NULL);
 }
 
-void* fonction_consommateur(void* cid) {
-    //je ne sais pas sert a quoi ?!
-    // int id = *(int *)cid;
+void* consommateur(void* cid) {
+    int id = *(int *)cid;
     
     while (1) {
         sem_wait(&plein);
@@ -90,14 +90,14 @@ int main(int argc, char* argv[]) {
     int id_producteurs[nb_producteurs];
     for (int i = 0; i < nb_producteurs; i++) {
         id_producteurs[i] = i;
-        pthread_create(&producteurs[i], NULL, fonction_producteur, &id_producteurs[i]);
+        pthread_create(&producteurs[i], NULL, producteur, &id_producteurs[i]);
     }
 
     pthread_t consommateurs[nb_consommateurs];
     int id_consommateurs[nb_consommateurs];
     for (int i = 0; i < nb_consommateurs; i++) {
         id_consommateurs[i] = i;
-        pthread_create(&consommateurs[i], NULL, fonction_consommateur, &id_consommateurs[i]);
+        pthread_create(&consommateurs[i], NULL, consommateur, &id_consommateurs[i]);
     }
 
     signal(SIGALRM, signal_alarme);
